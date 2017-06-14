@@ -1,7 +1,7 @@
 organization  := "ch.unibas.cs.gravis"
 
 name := """landmarks-clicker"""
-version := "1.0"
+version := "0.1.0"
 
 scalaVersion  := "2.11.7"
 
