@@ -6,7 +6,9 @@ licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0"))
 
 version := "0.1.0"
 
-scalaVersion  := "2.11.8"
+scalaVersion  := "2.12.1"
+
+crossScalaVersions := Seq("2.12.1", "2.11.8")
 
 scalacOptions := Seq("-unchecked", "-deprecation", "-encoding", "utf8")
 
