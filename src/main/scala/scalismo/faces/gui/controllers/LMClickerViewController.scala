@@ -31,7 +31,7 @@ import scala.util.Try
 /**
  * Landmarks clicker
  */
-class LMClickerViewController(private var workingDirectory: File) {
+class LMClickerViewController(private var workingDirectory: File, private var files: Seq[File]) {
   import LMClickerViewController._
 
   require(workingDirectory.exists() && workingDirectory.isDirectory, "invalid working directory")
@@ -40,19 +40,14 @@ class LMClickerViewController(private var workingDirectory: File) {
   private var currentImage = PixelImage.view(imageDomain, (x, y) => RGB.White)
 
   val landmarksModel = LandmarksModel(imageDomain)
-
-  def getLMWithIcons = {
-    landmarksModel.getLMLabels.map(l => {
-      val lmIcon = LandmarksModel.getLMIcon(l)
-      (l, lmIcon)
-    })
-  }
-
   val frameIcon = LandmarksModel.getLMIcon("clicker-icon")
 
   val clickerView: LMClickerView = LMClickerViewSwing(getLMWithIcons, workingDirectory.getPath, currentImage, frameIcon)
 
-  var clickedIdsIterator = Iterator(listUnclickedImages(workingDirectory) ++ listClickedImages(workingDirectory)).flatten // Kind of circular iterator
+  var clickedIdsIterator = files match {
+    case Nil => Iterator(listUnclickedImages (workingDirectory) ++ listClickedImages (workingDirectory) ).flatten
+    case files => checkForFilesToBeClicked(workingDirectory, files)
+  }
 
   setImageToNextFile() // load first image in directory, starts with unclicked
 
@@ -133,6 +128,13 @@ class LMClickerViewController(private var workingDirectory: File) {
   clickerView.onToggleClick(b => {
     if (landmarksModel.clickingEnabled) landmarksModel.setVisible(b)
   })
+
+  def getLMWithIcons = {
+    landmarksModel.getLMLabels.map(l => {
+      val lmIcon = LandmarksModel.getLMIcon(l)
+      (l, lmIcon)
+    })
+  }
 
   def setImageToNextFile() = {
 
@@ -229,9 +231,8 @@ class LMClickerViewController(private var workingDirectory: File) {
 }
 
 object LMClickerViewController {
-  def apply(workingDirectory: File, imageFile: Option[File] = None) = {
-    val clicker = new LMClickerViewController(workingDirectory)
-    imageFile.foreach { file => clicker.openImage(file) }
+  def apply(workingDirectory: File, imageFiles: Seq[File] = Nil) = {
+    val clicker = new LMClickerViewController(workingDirectory, imageFiles)
   }
 
   private val fileSeparator: String = File.pathSeparator
@@ -259,6 +260,31 @@ object LMClickerViewController {
   /** list all clicked files in a directory */
   def listClickedImages(directory: File): Seq[File] = {
     listImageFilesInDirectory(directory).filter { correspondingLandmarksFile(_).exists() }
+  }
+
+  /** Check which files can be found that are passed. */
+  def checkForFilesToBeClicked(workingDirectory: File, files: Seq[File]): Iterator[File] = {
+    files.flatMap { file =>
+      if (file.isAbsolute) {
+        println("one "+file.toString())
+        Some(file)
+      }
+      else if (file.exists()) {
+        println("two "+file.toString)
+        Some(file)
+      }
+      else {
+        val lastChance = new File(workingDirectory, file.toString)
+        if (lastChance.exists()) {
+          println("three "+lastChance.toString)
+          Some(lastChance)
+        }
+        else {
+          println(s"Warning: Could not find the image file for: ${file.toString}")
+          None
+        }
+      }
+    }.iterator
   }
 
   /** corresponding landmarks file to a given image file */

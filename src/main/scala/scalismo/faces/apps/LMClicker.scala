@@ -26,6 +26,6 @@ import scalismo.faces.gui.controllers.LMClickerViewController
 object LMClicker {
   def main(args: Array[String]): Unit = {
     val workingDir = args.headOption.getOrElse(new File(".").getCanonicalPath)
-    val controller = LMClickerViewController(new File(workingDir), None)
+    val controller = LMClickerViewController(new File(workingDir), args.tail.map(new File(_)))
   }
 }
