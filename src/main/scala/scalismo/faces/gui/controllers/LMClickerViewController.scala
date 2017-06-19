@@ -262,8 +262,14 @@ object LMClickerViewController {
   }
 
   /** corresponding landmarks file to a given image file */
-  def correspondingLandmarksFile(imageFile: File, faceNumber: Int = 0) = {
+//  def correspondingLandmarksFile(imageFile: File, faceNumber: Int = 0) = {
+//    val fileName = imageFile.getName.substring(0, imageFile.getName.lastIndexOf("."))
+//    new File(imageFile.getParent, fileName + s"_face$faceNumber.tlms")
+//  }
+
+// removed _face[IDX] from name as default.
+  def correspondingLandmarksFile(imageFile: File) = {
     val fileName = imageFile.getName.substring(0, imageFile.getName.lastIndexOf("."))
-    new File(imageFile.getParent, fileName + s"_face$faceNumber.tlms")
+    new File(imageFile.getParent, fileName + ".tlms")
   }
 }
