@@ -31,7 +31,7 @@ import scala.util.Try
 /**
  * Landmarks clicker
  */
-class LMClickerViewController(private var workingDirectory: File, private var files: Seq[File], changeLookAndFeel: Boolean = true) {
+class LMClickerViewController(private var workingDirectory: File, private var files: Seq[File]) {
   import LMClickerViewController._
 
   require(workingDirectory.exists() && workingDirectory.isDirectory, "invalid working directory")
@@ -42,7 +42,7 @@ class LMClickerViewController(private var workingDirectory: File, private var fi
   val landmarksModel = LandmarksModel(imageDomain)
   val frameIcon = LandmarksModel.getLMIcon("clicker-icon")
 
-  val clickerView: LMClickerView = LMClickerViewSwing(getLMWithIcons, workingDirectory.getPath, currentImage, frameIcon, changeLookAndFeel)
+  val clickerView: LMClickerView = LMClickerViewSwing(getLMWithIcons, workingDirectory.getPath, currentImage, frameIcon)
 
   var clickedIdsIterator = files match {
     case Nil => Iterator(listUnclickedImages (workingDirectory) ++ listClickedImages (workingDirectory) ).flatten
@@ -231,8 +231,8 @@ class LMClickerViewController(private var workingDirectory: File, private var fi
 }
 
 object LMClickerViewController {
-  def apply(workingDirectory: File, imageFiles: Seq[File] = Nil, changeLookAndFeel: Boolean = true) = {
-    val clicker = new LMClickerViewController(workingDirectory, imageFiles, changeLookAndFeel)
+  def apply(workingDirectory: File, imageFiles: Seq[File] = Nil) = {
+    val clicker = new LMClickerViewController(workingDirectory, imageFiles)
   }
 
   private val fileSeparator: String = File.pathSeparator
