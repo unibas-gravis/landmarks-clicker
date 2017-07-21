@@ -37,9 +37,10 @@ import scalismo.geometry.{Point, _2D}
 class LMClickerViewSwing(buttonLabels:IndexedSeq[(String, BufferedImage)],
                          workingDirectory: String,
                          startImage: PixelImage[RGB],
-                         frameIcon: BufferedImage) extends LMClickerView {
+                         frameIcon: BufferedImage,
+                         changeLookAndFeel: Boolean = true) extends LMClickerView {
   val viewTitle: String = "Landmarks Clicker"
-  UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName)
+  if(changeLookAndFeel) UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName)
 
 
 
@@ -241,6 +242,7 @@ object LMClickerViewSwing {
              labels: IndexedSeq[(String, BufferedImage)],
              stdDir: String,
              startImage: PixelImage[RGB],
-             frameIcon: BufferedImage
-           ) = new LMClickerViewSwing(labels, stdDir, startImage, frameIcon)
+             frameIcon: BufferedImage,
+             changeLookAndFeel: Boolean = true
+           ) = new LMClickerViewSwing(labels, stdDir, startImage, frameIcon, changeLookAndFeel)
 }
