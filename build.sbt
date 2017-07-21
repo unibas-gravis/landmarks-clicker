@@ -4,7 +4,7 @@ name := """landmarks-clicker"""
 
 licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0")) 
 
-version := "0.1.0"
+version := "0.2.0"
 
 scalaVersion  := "2.12.1"
 

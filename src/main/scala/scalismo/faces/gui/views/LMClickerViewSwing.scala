@@ -39,7 +39,6 @@ class LMClickerViewSwing(buttonLabels:IndexedSeq[(String, BufferedImage)],
                          startImage: PixelImage[RGB],
                          frameIcon: BufferedImage) extends LMClickerView {
   val viewTitle: String = "Landmarks Clicker"
-  UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName)
 
 
 

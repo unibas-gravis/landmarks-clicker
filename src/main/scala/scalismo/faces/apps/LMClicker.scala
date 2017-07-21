@@ -17,6 +17,7 @@
 package scalismo.faces.apps
 
 import java.io.File
+import javax.swing.UIManager
 
 import scalismo.faces.gui.controllers.LMClickerViewController
 
@@ -25,6 +26,7 @@ import scalismo.faces.gui.controllers.LMClickerViewController
  */
 object LMClicker {
   def main(args: Array[String]): Unit = {
+    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName)
     val workingDir = args.headOption.getOrElse(new File(".").getCanonicalPath)
     val controller = LMClickerViewController(new File(workingDir), args.tail.map(new File(_)))
   }
