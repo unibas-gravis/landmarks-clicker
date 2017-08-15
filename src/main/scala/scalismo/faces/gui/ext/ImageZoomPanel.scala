@@ -122,6 +122,12 @@ class ImageZoomPanel(width: Int, height: Int, image: PixelImage[RGB])
       Tx += dT.x.round.toInt
       Ty += dT.y.round.toInt
       zoom *= zoomD
+    } else if (e.isShiftDown) {
+      val horizontalScroll = e.getPreciseWheelRotation
+      Tx -= (2 * horizontalScroll).toInt
+    } else {
+      val verticalScroll = e.getPreciseWheelRotation
+      Ty -= (2 * verticalScroll).toInt
     }
 
     repaint()

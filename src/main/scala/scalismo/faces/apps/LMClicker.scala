@@ -28,6 +28,6 @@ object LMClicker {
   def main(args: Array[String]): Unit = {
     UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName)
     val workingDir = args.headOption.getOrElse(new File(".").getCanonicalPath)
-    val controller = LMClickerViewController(new File(workingDir), args.tail.map(new File(_)))
+    val controller = LMClickerViewController(new File(workingDir), args.drop(1).map(new File(_)))
   }
 }
