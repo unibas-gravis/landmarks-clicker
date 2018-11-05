@@ -21,7 +21,7 @@ import javax.imageio.ImageIO
 
 import scalismo.faces.gui.models.LandmarksModel
 import scalismo.faces.gui.views.{LMClickerView, LMClickerViewSwing}
-import scalismo.faces.color.RGB
+import scalismo.color.RGB
 import scalismo.faces.image.{BufferedImageConverter, PixelImage, PixelImageDomain}
 import scalismo.faces.io.PixelImageIO
 import scalismo.geometry.{Point, _2D}

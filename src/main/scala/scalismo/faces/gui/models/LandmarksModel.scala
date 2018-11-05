@@ -23,7 +23,7 @@ import javax.imageio.ImageIO
 import javax.swing.GrayFilter
 
 import breeze.linalg.functions.euclideanDistance
-import scalismo.faces.color.{RGB, RGBA}
+import scalismo.color.RGBA
 import scalismo.faces.image.{BufferedImageConverter, PixelImage, PixelImageDomain}
 import scalismo.faces.landmarks.TLMSLandmark2D
 import scalismo.faces.io.TLMSLandmarksIO

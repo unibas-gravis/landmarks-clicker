@@ -24,7 +24,7 @@ import javax.swing._
 
 import scalismo.faces.gui.ext.GUIBlock._
 import scalismo.faces.gui.ext.{ClickerImage, ImagePanel, LandmarkButton}
-import scalismo.faces.color.RGB
+import scalismo.color.RGB
 import scalismo.faces.gui.GUIFrame
 import scalismo.faces.image.PixelImage
 import scalismo.faces.landmarks.TLMSLandmark2D

@@ -19,7 +19,7 @@ import java.awt._
 import javax.swing.{GrayFilter, JComponent, JPanel, SwingUtilities}
 import javax.swing.plaf.LayerUI
 
-import scalismo.faces.color.RGB
+import scalismo.color.RGB
 import scalismo.faces.gui.models.LandmarksModel
 import scalismo.faces.landmarks.TLMSLandmark2D
 import scalismo.geometry.{Point, Vector, _2D}

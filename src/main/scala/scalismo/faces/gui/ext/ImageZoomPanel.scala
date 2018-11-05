@@ -22,7 +22,7 @@ import java.awt.{Color, Dimension, Graphics}
 
 import breeze.linalg.{max, min}
 import breeze.numerics.pow
-import scalismo.faces.color.RGB
+import scalismo.color.RGB
 import scalismo.faces.image.{BufferedImageConverter, PixelImage}
 import scalismo.geometry.{Point, Vector, _2D}
 
