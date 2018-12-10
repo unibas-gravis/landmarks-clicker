@@ -70,6 +70,7 @@ class LandmarksModel(domain: PixelImageDomain){
   def readLandmarkSetFromFile(file: File): Unit = {
     val tlms = TLMSLandmarksIO.read2D(file).get
     landmarks = tlms.map(tlms => tlms.id)
+    tlms.foreach(l => landmarksMap.update(l.id, None))
   }
 
   object State extends Enumeration {
