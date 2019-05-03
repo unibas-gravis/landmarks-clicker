@@ -22,7 +22,7 @@ import javax.swing.plaf.LayerUI
 import scalismo.color.RGB
 import scalismo.faces.gui.models.LandmarksModel
 import scalismo.faces.landmarks.TLMSLandmark2D
-import scalismo.geometry.{Point, Vector, _2D}
+import scalismo.geometry.{Point, _2D}
 import java.awt
 import java.awt.event.{MouseEvent, MouseListener}
 

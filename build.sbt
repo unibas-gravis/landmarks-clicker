@@ -21,7 +21,7 @@ resolvers += "Statismo (public)" at "http://shapemodelling.cs.unibas.ch/reposito
 resolvers += Opts.resolver.sonatypeSnapshots
 
 libraryDependencies  ++= Seq(
-    "ch.unibas.cs.gravis" %% "scalismo-faces" % "noVertexColorMesh3D-8bf175966cabf995c7003ec65138db01b6aa073e"
+    "ch.unibas.cs.gravis" %% "scalismo-faces" % "0.10.1"
 )
 
 mainClass in assembly := Some("scalismo.faces.apps.LMClicker")
