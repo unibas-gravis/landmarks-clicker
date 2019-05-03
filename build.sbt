@@ -2,9 +2,9 @@ organization  := "ch.unibas.cs.gravis"
 
 name := """landmarks-clicker"""
 
-licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0")) 
+licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0"))
 
-version := "vertexColorMeshInScalismo"
+version := "0.3.0"
 
 scalaVersion  := "2.12.6"
 
