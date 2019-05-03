@@ -21,7 +21,7 @@ import java.awt.event._
 import javax.swing.plaf.LayerUI
 import javax.swing.{JComponent, JLayer, JPanel}
 
-import scalismo.faces.color.RGB
+import scalismo.color.RGB
 import scalismo.faces.image.PixelImage
 import scalismo.geometry
 import scalismo.geometry.{Point, _2D}

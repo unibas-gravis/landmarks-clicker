@@ -24,7 +24,7 @@ import javax.swing._
 import javax.swing.event.{ChangeEvent, ChangeListener}
 import javax.swing.filechooser.FileNameExtensionFilter
 
-import scalismo.faces.color.RGB
+import scalismo.color.RGB
 import scalismo.faces.gui.GUIFrame
 import scalismo.faces.image.{BufferedImageConverter, PixelImage}
 import scalismo.faces.utils.LanguageUtilities

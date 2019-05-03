@@ -19,7 +19,7 @@ package scalismo.faces.gui.views
 import java.awt.image.BufferedImage
 import java.io.File
 
-import scalismo.faces.color.RGB
+import scalismo.color.RGB
 import scalismo.faces.image.PixelImage
 import scalismo.faces.landmarks.TLMSLandmark2D
 import scalismo.geometry.{Point, _2D}

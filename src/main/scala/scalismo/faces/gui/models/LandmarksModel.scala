@@ -23,7 +23,7 @@ import javax.imageio.ImageIO
 import javax.swing.GrayFilter
 
 import breeze.linalg.functions.euclideanDistance
-import scalismo.faces.color.{RGB, RGBA}
+import scalismo.color.RGBA
 import scalismo.faces.image.{BufferedImageConverter, PixelImage, PixelImageDomain}
 import scalismo.faces.landmarks.TLMSLandmark2D
 import scalismo.faces.io.TLMSLandmarksIO
@@ -70,6 +70,7 @@ class LandmarksModel(domain: PixelImageDomain){
   def readLandmarkSetFromFile(file: File): Unit = {
     val tlms = TLMSLandmarksIO.read2D(file).get
     landmarks = tlms.map(tlms => tlms.id)
+    tlms.foreach(l => landmarksMap.update(l.id, None))
   }
 
   object State extends Enumeration {

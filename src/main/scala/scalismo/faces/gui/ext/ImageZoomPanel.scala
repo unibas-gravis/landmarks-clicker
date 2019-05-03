@@ -22,9 +22,9 @@ import java.awt.{Color, Dimension, Graphics}
 
 import breeze.linalg.{max, min}
 import breeze.numerics.pow
-import scalismo.faces.color.RGB
+import scalismo.color.RGB
 import scalismo.faces.image.{BufferedImageConverter, PixelImage}
-import scalismo.geometry.{Point, Vector, _2D}
+import scalismo.geometry.{EuclideanVector, Point, _2D}
 
 /**
   * Image panel that can move and zoom images.
@@ -117,7 +117,7 @@ class ImageZoomPanel(width: Int, height: Int, image: PixelImage[RGB])
       } else {
         1.0
       }
-      val dT = mousePos.toVector * (1.0 - zoomD) + Vector(Tx, Ty) * (zoomD - 1.0)
+      val dT = mousePos.toVector * (1.0 - zoomD) + EuclideanVector(Tx, Ty) * (zoomD - 1.0)
 
       Tx += dT.x.round.toInt
       Ty += dT.y.round.toInt
@@ -162,13 +162,13 @@ class ImageZoomPanel(width: Int, height: Int, image: PixelImage[RGB])
 
   override def screenToImage(screenPoint: awt.Point): Point[_2D] = {
     val newPos = Point(screenPoint.x,screenPoint.y)
-    val offset = Vector(Tx+txD,Ty+tyD)
+    val offset = EuclideanVector(Tx+txD,Ty+tyD)
     val imagePoint = ((newPos.toVector-offset)/(zoom)).toPoint
     imagePoint
   }
 
   override def imageToScreen(imagePoint: Point[_2D]): awt.Point = {
-    val offset = Vector(Tx+txD,Ty+tyD)
+    val offset = EuclideanVector(Tx+txD,Ty+tyD)
     val newPos = (imagePoint.toVector*(zoom)+offset).toPoint
     new awt.Point(newPos.x.toInt,newPos.y.toInt)
   }
