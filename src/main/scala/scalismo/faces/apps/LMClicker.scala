@@ -22,12 +22,12 @@ import javax.swing.UIManager
 import scalismo.faces.gui.controllers.LMClickerViewController
 
 /**
- * Landmarks clicker script
- */
+  * Landmarks clicker script
+  */
 object LMClicker {
   def main(args: Array[String]): Unit = {
     UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName)
     val workingDir = args.headOption.getOrElse(new File(".").getCanonicalPath)
-    val controller = LMClickerViewController(new File(workingDir), args.drop(1).map(new File(_)))
+    LMClickerViewController(new File(workingDir), args.drop(1).map(new File(_)).toIndexedSeq)
   }
 }

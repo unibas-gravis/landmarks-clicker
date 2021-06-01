@@ -21,7 +21,6 @@ import java.awt.{Color, RenderingHints}
 import java.io.File
 import javax.imageio.ImageIO
 import javax.swing.GrayFilter
-
 import breeze.linalg.functions.euclideanDistance
 import scalismo.color.RGBA
 import scalismo.faces.image.{BufferedImageConverter, PixelImage, PixelImageDomain}
@@ -30,43 +29,43 @@ import scalismo.faces.io.TLMSLandmarksIO
 import scalismo.geometry.{Point, _2D}
 
 import scala.collection.mutable
-
+import scala.util.Try
 
 object LandmarksModel {
   def apply(domain: PixelImageDomain) = new LandmarksModel(domain)
 
-  val lmMap = mutable.Map[String,BufferedImage]()
+  val lmMap: mutable.Map[String, BufferedImage] = mutable.Map[String, BufferedImage]()
 
   /** load a landmarks icon from resources in the jar file */
   def getLMIcon(lm: String): BufferedImage = {
-    if( lmMap.contains(lm) ) return lmMap(lm)
+    if (lmMap.contains(lm)) return lmMap(lm)
 
     val resource = getClass.getResource(s"/lmicons/${lm}_thumb.png")
-    val image = if ( resource != null) {
+    val image = if (resource != null) {
       ImageIO.read(resource.openStream())
     } else {
       val defaultResource = getClass.getResource(s"/lmicons/default_thumb.png")
-      if ( defaultResource != null ) {
+      if (defaultResource != null) {
         ImageIO.read(defaultResource.openStream())
       } else {
-        getRedDot()
+        getRedDot
       }
     }
-    lmMap += Tuple2(lm,image)
+    lmMap += Tuple2(lm, image)
     image
   }
 
-  def getRedDot(): BufferedImage = {
-    val dot = new BufferedImage(25,25,BufferedImage.TYPE_INT_ARGB)
+  def getRedDot: BufferedImage = {
+    val dot = new BufferedImage(25, 25, BufferedImage.TYPE_INT_ARGB)
     val g2d = dot.createGraphics()
-    g2d.setColor(new Color(255,0,0,80))
-    g2d.fillOval(7,7, 9, 9)
+    g2d.setColor(new Color(255, 0, 0, 80))
+    g2d.fillOval(7, 7, 9, 9)
     g2d.dispose()
     dot
   }
 }
 
-class LandmarksModel(domain: PixelImageDomain){
+class LandmarksModel(domain: PixelImageDomain) {
   def readLandmarkSetFromFile(file: File): Unit = {
     val tlms = TLMSLandmarksIO.read2D(file).get
     landmarks = tlms.map(tlms => tlms.id)
@@ -98,9 +97,9 @@ class LandmarksModel(domain: PixelImageDomain){
   private var currentLandmark = 0
   private var prevLandmark = -1
   private var wasLastClicked = false
-  val landmarksMap = mutable.Map(landmarks.zip(List.fill(landmarks.size)(None: Option[TLMSLandmark2D])): _*)
+  val landmarksMap: mutable.Map[String, Option[TLMSLandmark2D]] = mutable.Map(landmarks.zip(List.fill(landmarks.size)(None: Option[TLMSLandmark2D])): _*)
 
-  def clickingEnabled = state != Start
+  def clickingEnabled: Boolean = state != Start
 
   def startClicking(): Unit = {
     state = NormalClicking
@@ -113,28 +112,28 @@ class LandmarksModel(domain: PixelImageDomain){
       state = NotVisible
   }
 
-  def getLandmarkByPosition(point: scalismo.geometry.Point[_2D], threshold:Double = 25d) = {
-    val distTuple = landmarksMap.values.flatten.foldLeft((None:Option[TLMSLandmark2D], Double.MaxValue))((prevDist, currentLM:TLMSLandmark2D) => {
+  def getLandmarkByPosition(point: scalismo.geometry.Point[_2D], threshold: Double = 25d): Option[TLMSLandmark2D] = {
+    val distTuple = landmarksMap.values.flatten.foldLeft((None: Option[TLMSLandmark2D], Double.MaxValue))((prevDist, currentLM: TLMSLandmark2D) => {
       val distance = euclideanDistance(point.toBreezeVector, currentLM.point.toBreezeVector)
-      if(prevDist._2 > distance) (Some(currentLM), distance) else prevDist
+      if (prevDist._2 > distance) (Some(currentLM), distance) else prevDist
     })
-    if(distTuple._2 < threshold) distTuple._1 else None
+    if (distTuple._2 < threshold) distTuple._1 else None
   }
 
-  def setCurrent(id: String) = {
+  def setCurrent(id: String): Unit = {
     prevLandmark = currentLandmark
     currentLandmark = landmarks.indexOf(id)
     wasLastClicked = false
   }
 
-  def getLMLabels = landmarks
+  def getLMLabels: Seq[String] = landmarks
 
-  def current = landmarks(currentLandmark)
+  def current: String = landmarks(currentLandmark)
 
-  def prev = landmarks.lift(currentLandmark-1)
+  def prev: Option[String] = landmarks.lift(currentLandmark - 1)
 
   def next: Option[String] = {
-    if(state != Start) {
+    if (state != Start) {
       prevLandmark = currentLandmark
       if (currentLandmark < landmarks.size - 1) {
         currentLandmark += 1
@@ -143,27 +142,27 @@ class LandmarksModel(domain: PixelImageDomain){
     } else None
   }
 
-  def remove(landmarkID: String) = landmarksMap.remove(landmarkID)
+  def remove(landmarkID: String): Option[Option[TLMSLandmark2D]] = landmarksMap.remove(landmarkID)
 
-  def add(point: Point[_2D]) = {
+  def add(point: Point[_2D]): Unit = {
     wasLastClicked = true
     val id = current
-    if(state == NormalClicking){
+    if (state == NormalClicking) {
       landmarksMap.update(id, Some(TLMSLandmark2D(id, point, visible = true)))
-    }    else if (state == NotVisible){
+    } else if (state == NotVisible) {
       landmarksMap.update(id, Some(TLMSLandmark2D(id, point, visible = false)))
     }
   }
 
   def addLandmarksFromExistingFile(lmFile: File): Unit = {
-    if(lmFile.exists()){
-      for(current <- TLMSLandmarksIO.read2D(lmFile).get){
+    if (lmFile.exists()) {
+      for (current <- TLMSLandmarksIO.read2D(lmFile).get) {
         landmarksMap.update(current.id, Some(current.copy(point = current.point)))
       }
     }
   }
 
-  def saveLandmarksToFile(tlmsFile: File) = {
+  def saveLandmarksToFile(tlmsFile: File): Try[Unit] = {
     val transformedCoords = getAddedLandmarks.map(lm => {
       lm.copy(point = lm.point)
     })
@@ -171,11 +170,11 @@ class LandmarksModel(domain: PixelImageDomain){
     TLMSLandmarksIO.write2D(transformedCoords, tlmsFile)
   }
 
-  def getAddedLandmarks = {
-    landmarks.map(landmarksMap(_)).flatten.toIndexedSeq
+  def getAddedLandmarks: IndexedSeq[TLMSLandmark2D] = {
+    landmarks.flatMap(landmarksMap(_))
   }
 
-  def reset() = {
+  def reset(): Unit = {
     currentLandmark = 0
     prevLandmark = -1
     landmarksMap.foreach(m => {
@@ -184,15 +183,15 @@ class LandmarksModel(domain: PixelImageDomain){
   }
 
   /** draw landmarks into image with special icon for each landmark */
-  def drawLandmarksWithCustomIcon(image: PixelImage[RGBA], landmarks: Iterable[TLMSLandmark2D], color: RGBA, size: Int): PixelImage[RGBA] = {
+  def drawLandmarksWithCustomIcon(image: PixelImage[RGBA], landmarks: Iterable[TLMSLandmark2D], color: RGBA): PixelImage[RGBA] = {
     val bufImg: BufferedImage = BufferedImageConverter.toBufferedImage(image)
     val g2d = bufImg.createGraphics()
     g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
     g2d.setPaint(new Color(color.r.toFloat, color.g.toFloat, color.b.toFloat))
-    for (lm <- landmarks){
+    for (lm <- landmarks) {
 
       val lmImage = LandmarksModel.getLMIcon(lm.id)
-      if(lm.visible) {
+      if (lm.visible) {
         g2d.drawImage(lmImage, (lm.point.x - lmImage.getWidth / 2).toInt, (lm.point.y - lmImage.getHeight / 2).toInt, null)
       } else {
         g2d.drawImage(GrayFilter.createDisabledImage(lmImage), (lm.point.x - lmImage.getWidth / 2).toInt, (lm.point.y - lmImage.getHeight / 2).toInt, null)

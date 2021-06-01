@@ -16,14 +16,6 @@
 
 package scalismo.faces.gui.ext
 
-import java.awt._
-import java.awt.event.{ActionEvent, ActionListener, MouseAdapter, MouseEvent}
-import java.awt.image.BufferedImage
-import java.io.File
-import javax.swing._
-import javax.swing.event.{ChangeEvent, ChangeListener}
-import javax.swing.filechooser.FileNameExtensionFilter
-
 import scalismo.color.RGB
 import scalismo.faces.gui.GUIFrame
 import scalismo.faces.image.{BufferedImageConverter, PixelImage}
@@ -31,16 +23,27 @@ import scalismo.faces.utils.LanguageUtilities
 import scalismo.faces.utils.LanguageUtilities._
 import scalismo.geometry.{Point, _2D}
 
+import java.awt._
+import java.awt.event.{ActionEvent, MouseAdapter, MouseEvent}
+import java.awt.image.BufferedImage
+import java.io.File
+import javax.swing._
+import javax.swing.event.ChangeEvent
+import javax.swing.filechooser.FileNameExtensionFilter
 
 object GUIBlock {
+
+  trait HasActionWithShortcut { def addActionWithShortcut(action: () => Unit, shortcut: Option[String]): Unit }
+  type XButton = JButton with HasActionWithShortcut
+
   /** implicit attachment of display functions to JComponents */
   implicit def pimpComponent(component: JComponent): GUIBlock = new GUIBlock(component)
 
   /** GUI block: can display itself in a GUIFrame */
   class GUIBlock(val component: JComponent) {
-    def displayInNewFrame(title: String) = GUIFrame(title, component)
+    def displayInNewFrame(title: String): GUIFrame = GUIFrame(title, component)
 
-    def displayIn(frame: GUIFrame) = frame.display(component)
+    def displayIn(frame: GUIFrame): Unit = frame.display(component)
   }
 
   /** horizontal container */
@@ -97,7 +100,7 @@ object GUIBlock {
   def grid(cols: Int, rows: Int, component: => JComponent): JPanel = {
     withMutable(new JPanel()) { p =>
       p.setLayout(new GridLayout(cols, rows))
-      for (x <- 0 until cols; y <- 0 until rows) p.add(component)
+      for (_ <- 0 until cols; _ <- 0 until rows) p.add(component)
     }
   }
 
@@ -109,7 +112,8 @@ object GUIBlock {
   /** display a message */
   def alert(msg: String): Unit = alert(msg, null)
 
-  def button(text: String, enabled: Boolean = true) = new JButton(text) {
+  def button(text: String, enabled: Boolean = true): XButton = new JButton(text) with HasActionWithShortcut {
+
     /**
       * Adds an action which can be called also by a shortcut
       *
@@ -117,21 +121,20 @@ object GUIBlock {
       * @param shortcut e.g. "control S"
       */
     def addActionWithShortcut(action: () => Unit, shortcut: Option[String]): Unit = {
-      addActionListener(
-        LanguageUtilities.withMutable(new AbstractAction() {
-          override def actionPerformed(e: ActionEvent): Unit = {
-            action()
-          }
-        }) { l => {
+      addActionListener(LanguageUtilities.withMutable(new AbstractAction() {
+        override def actionPerformed(e: ActionEvent): Unit = {
+          action()
+        }
+      }) { l =>
+        {
           if (shortcut.isDefined) {
             l.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(shortcut.get))
             getActionMap.put(s"${shortcut}Action", l)
-            getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(l.getValue(Action.ACCELERATOR_KEY).asInstanceOf[KeyStroke],
-              s"${shortcut}Action")
+            getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(l.getValue(Action.ACCELERATOR_KEY).asInstanceOf[KeyStroke], s"${shortcut}Action")
             setToolTipText(s"Shortcut: ${shortcut.get}")
           }
         }
-        })
+      })
     }
 
     setEnabled(enabled)
@@ -140,9 +143,7 @@ object GUIBlock {
   /** create a button with a listener */
   def button(text: String, clickListener: () => Unit): JButton = {
     withMutable(new JButton(text)) { b =>
-      b.addActionListener(new ActionListener {
-        override def actionPerformed(e: ActionEvent): Unit = clickListener()
-      })
+      b.addActionListener((_: ActionEvent) => clickListener())
     }
   }
 
@@ -153,7 +154,7 @@ object GUIBlock {
   def toggleButton(text: String, selected: Boolean) = new JToggleButton(text, selected)
 
   /** create a text box */
-  def textBox(cols: Int, text: String) = {
+  def textBox(cols: Int, text: String): JTextField = {
     withMutable(new JTextField()) { t =>
       t.setColumns(cols)
       t.setText(text)
@@ -166,9 +167,7 @@ object GUIBlock {
   /** create a slider element */
   def slider(min: Int, max: Int, value: Int, changeListener: Int => Unit, orientation: Int = SwingConstants.VERTICAL): JSlider = {
     withMutable(new JSlider(orientation, min, max, value)) { s =>
-      s.addChangeListener(new ChangeListener {
-        override def stateChanged(e: ChangeEvent): Unit = changeListener(s.getValue)
-      })
+      s.addChangeListener((_: ChangeEvent) => changeListener(s.getValue))
     }
   }
 
@@ -176,38 +175,32 @@ object GUIBlock {
   def separator(orientation: Int = SwingConstants.VERTICAL) = new JSeparator(orientation)
 
   /** pad a component */
-  def pad(component: JComponent) = withMutable(new JPanel()) { panel =>
+  def pad(component: JComponent): JPanel = withMutable(new JPanel()) { panel =>
     panel.setLayout(new GridLayout())
     panel.add(component)
   }
 }
 
 class ImageChooser(workingDirectory: String) extends JFileChooser {
-  val filter = new FileNameExtensionFilter(
-    "JPG & PNG Images", "jpg", "png")
+  val filter = new FileNameExtensionFilter("JPG & PNG Images", "jpg", "png")
   setFileFilter(filter)
   setCurrentDirectory(new File(workingDirectory))
 
-  def onImageChosen(callback: (ActionEvent) => Unit): Unit = {
-    addActionListener(new ActionListener {
-      override def actionPerformed(e: ActionEvent): Unit = {
-        callback(e)
-      }
+  def onImageChosen(callback: ActionEvent => Unit): Unit = {
+    addActionListener((e: ActionEvent) => {
+      callback(e)
     })
   }
 }
 
 class LandmarkSetChooser(workingDirectory: String) extends JFileChooser {
-  val filter = new FileNameExtensionFilter(
-    "TLMS files", "tlms")
+  val filter = new FileNameExtensionFilter("TLMS files", "tlms")
   setFileFilter(filter)
   setCurrentDirectory(new File(workingDirectory))
 
-  def onLandmarkSetChosen(callback: (ActionEvent) => Unit): Unit = {
-    addActionListener(new ActionListener {
-      override def actionPerformed(e: ActionEvent): Unit = {
-        callback(e)
-      }
+  def onLandmarkSetChosen(callback: ActionEvent => Unit): Unit = {
+    addActionListener((e: ActionEvent) => {
+      callback(e)
     })
   }
 }
@@ -239,16 +232,16 @@ class ImagePanel(width: Int, height: Int, var image: PixelImage[RGB]) extends JP
   }
 
   /** update the image (repaints this panel) */
-  def updateImage(image: PixelImage[RGB]) = {
+  def updateImage(image: PixelImage[RGB]): Unit = {
     this.image = image
     val dim = new Dimension(image.width, image.height)
     setPreferredSize(dim)
     repaint()
   }
 
-  def onImageClick(actionLeftClick: (Point[_2D]) => Unit, actionRightClick: (Point[_2D]) => Unit) = {
+  def onImageClick(actionLeftClick: Point[_2D] => Unit, actionRightClick: Point[_2D] => Unit): Unit = {
     addMouseListener(new MouseAdapter {
-      override def mouseClicked(e: MouseEvent) = {
+      override def mouseClicked(e: MouseEvent): Unit = {
         val imagePoint = screenToImage(e.getPoint)
         if (imagePoint.x >= 0 && imagePoint.x < image.width && imagePoint.y >= 0 && imagePoint.y < image.height) {
           if (SwingUtilities.isLeftMouseButton(e)) actionLeftClick(imagePoint)
@@ -261,7 +254,7 @@ class ImagePanel(width: Int, height: Int, var image: PixelImage[RGB]) extends JP
   def screenToImage(screenPoint: java.awt.Point): Point[_2D] = {
     val scale = imageScale
     val (dx, dy) = imageOffset
-    Point((screenPoint.x - dx)/scale, (screenPoint.y - dy)/scale)
+    Point((screenPoint.x - dx) / scale, (screenPoint.y - dy) / scale)
   }
 
   def imageToScreen(imagePoint: Point[_2D]): java.awt.Point = {
