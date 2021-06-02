@@ -31,13 +31,15 @@ import scalismo.geometry.{EuclideanVector, Point, _2D}
   *
   */
 class ImageZoomPanel(width: Int, height: Int, image: PixelImage[RGB])
-  extends ImagePanel(width, height, image) with MouseListener with MouseMotionListener with MouseWheelListener {
+    extends ImagePanel(width, height, image)
+    with MouseListener
+    with MouseMotionListener
+    with MouseWheelListener {
   setPreferredSize(new Dimension(width, height))
 
   this.addMouseListener(this)
   this.addMouseMotionListener(this)
   this.addMouseWheelListener(this)
-
 
   object ViewerState extends Enumeration {
     type ViewerState = Value
@@ -51,15 +53,15 @@ class ImageZoomPanel(width: Int, height: Int, image: PixelImage[RGB])
   val maxZoom = 4.0
   var downPosition: Point[_2D] = Point(-1, -1)
   var zoom: Double = initialZoom()
-  var Tx = initialTx()
+  var Tx: Int = initialTx()
   var txD: Int = 0
-  var Ty = initialTy()
+  var Ty: Int = initialTy()
   var tyD: Int = 0
   var state: ViewerState = NEUTRAL
 
-  def initialZoom() = max(minZoom,min(maxZoom,min(width.toDouble/bufferedImage.getWidth,height.toDouble/bufferedImage.getHeight)))
-  def initialTx() = ((width - bufferedImage.getWidth*zoom) / 2).toInt
-  def initialTy() = ((height - bufferedImage.getHeight*zoom) / 2).toInt
+  def initialZoom(): Double = max(minZoom, min(maxZoom, min(width.toDouble / bufferedImage.getWidth, height.toDouble / bufferedImage.getHeight)))
+  def initialTx(): Int = ((width - bufferedImage.getWidth * zoom) / 2).toInt
+  def initialTy(): Int = ((height - bufferedImage.getHeight * zoom) / 2).toInt
 
   override def updateImage(image: PixelImage[RGB]): Unit = {
     super.updateImage(image)
@@ -76,15 +78,14 @@ class ImageZoomPanel(width: Int, height: Int, image: PixelImage[RGB])
   }
 
   override def paintComponent(g: Graphics): Unit = {
-    g.setColor(new Color(1.0f,1.0f,1.0f,1.0f))
-    g.clearRect(0,0,this.width,this.height)
+    g.setColor(new Color(1.0f, 1.0f, 1.0f, 1.0f))
+    g.clearRect(0, 0, this.width, this.height)
     val scaling = zoom
     val newW = (bufferedImage.getWidth * scaling).toInt
     val newH = (bufferedImage.getHeight * scaling).toInt
     val scaledImage = bufferedImage.getScaledInstance(newW, newH, java.awt.Image.SCALE_SMOOTH)
     g.drawImage(scaledImage, Tx + txD, Ty + tyD, new Color(0, 0, 0), null)
   }
-
 
   override def mouseExited(e: MouseEvent): Unit = {}
 
@@ -106,7 +107,7 @@ class ImageZoomPanel(width: Int, height: Int, image: PixelImage[RGB])
 
   override def mouseWheelMoved(e: MouseWheelEvent): Unit = {
 
-    if ( e.isControlDown ) {
+    if (e.isControlDown) {
       val mousePos = Point(e.getX, e.getY)
       val diff = e.getPreciseWheelRotation
 
@@ -154,22 +155,22 @@ class ImageZoomPanel(width: Int, height: Int, image: PixelImage[RGB])
 
     if (state == MOVE) {
       txD = -(downPosition.x - p.x).toInt
-      tyD = -(downPosition.y-p.y).toInt
+      tyD = -(downPosition.y - p.y).toInt
     }
 
     repaint()
   }
 
   override def screenToImage(screenPoint: awt.Point): Point[_2D] = {
-    val newPos = Point(screenPoint.x,screenPoint.y)
-    val offset = EuclideanVector(Tx+txD,Ty+tyD)
-    val imagePoint = ((newPos.toVector-offset)/(zoom)).toPoint
+    val newPos = Point(screenPoint.x, screenPoint.y)
+    val offset = EuclideanVector(Tx + txD, Ty + tyD)
+    val imagePoint = ((newPos.toVector - offset) / zoom).toPoint
     imagePoint
   }
 
   override def imageToScreen(imagePoint: Point[_2D]): awt.Point = {
-    val offset = EuclideanVector(Tx+txD,Ty+tyD)
-    val newPos = (imagePoint.toVector*(zoom)+offset).toPoint
-    new awt.Point(newPos.x.toInt,newPos.y.toInt)
+    val offset = EuclideanVector(Tx + txD, Ty + tyD)
+    val newPos = (imagePoint.toVector * zoom + offset).toPoint
+    new awt.Point(newPos.x.toInt, newPos.y.toInt)
   }
 }

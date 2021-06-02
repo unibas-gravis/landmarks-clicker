@@ -18,45 +18,47 @@ package scalismo.faces.gui.controllers
 
 import java.io.File
 import javax.imageio.ImageIO
-
 import scalismo.faces.gui.models.LandmarksModel
 import scalismo.faces.gui.views.{LMClickerView, LMClickerViewSwing}
 import scalismo.color.RGB
-import scalismo.faces.image.{BufferedImageConverter, PixelImage, PixelImageDomain}
+import scalismo.faces.image.{BufferedImageConverter, ColumnMajorImageDomain, PixelImage, PixelImageDomain}
 import scalismo.faces.io.PixelImageIO
 import scalismo.geometry.{Point, _2D}
 
+import java.awt.image.BufferedImage
 import scala.util.Try
 
 /**
- * Landmarks clicker
- */
+  * Landmarks clicker
+  */
 class LMClickerViewController(private var workingDirectory: File, private var files: Seq[File]) {
   import LMClickerViewController._
 
   require(workingDirectory.exists() && workingDirectory.isDirectory, "invalid working directory")
 
-  val imageDomain = PixelImageDomain(1024, 1024)
-  private var currentImage = PixelImage.view(imageDomain, (x, y) => RGB.White)
+  val imageDomain: ColumnMajorImageDomain = PixelImageDomain(1024, 1024)
+  private var currentImage = PixelImage.view(imageDomain, (_, _) => RGB.White)
 
-  val landmarksModel = LandmarksModel(imageDomain)
-  val frameIcon = LandmarksModel.getLMIcon("clicker-icon")
+  val landmarksModel: LandmarksModel = LandmarksModel(imageDomain)
+  val frameIcon: BufferedImage = LandmarksModel.getLMIcon("clicker-icon")
 
   val clickerView: LMClickerView = LMClickerViewSwing(getLMWithIcons, workingDirectory.getPath, currentImage, frameIcon)
 
-  var clickedIdsIterator = files match {
-    case Nil => Iterator(listUnclickedImages (workingDirectory) ++ listClickedImages (workingDirectory) ).flatten
+  var clickedIdsIterator: Iterator[File] = files match {
+    case Nil   => Iterator(listNotYetClickedImages(workingDirectory) ++ listClickedImages(workingDirectory)).flatten
     case files => checkForFilesToBeClicked(workingDirectory, files)
   }
 
-  setImageToNextFile() // load first image in directory, starts with unclicked
+  setImageToNextFile() // load first image in directory, starts with not yet clicked
 
-  clickerView.onResetButtonClick(() => if (landmarksModel.clickingEnabled) {
-    resetLandmarks()
-    updateView()
+  clickerView.onResetButtonClick(() =>
+    if (landmarksModel.clickingEnabled) {
+      resetLandmarks()
+      updateView()
   })
 
-  clickerView.onSaveButtonClick( () => if (landmarksModel.clickingEnabled) {
+  clickerView.onSaveButtonClick(() =>
+    if (landmarksModel.clickingEnabled) {
       saveLandmarksFile()
   })
 
@@ -90,22 +92,22 @@ class LMClickerViewController(private var workingDirectory: File, private var fi
 
   clickerView.onImageClick(
     actionLeftClick = (point: Point[_2D]) => {
-    if (landmarksModel.clickingEnabled) {
-      landmarksModel.add(point)
-      landmarksModel.next
-      updateView()
-    }
-  },
-    actionRightClick = (point: Point[_2D]) => {
-    if (landmarksModel.clickingEnabled) {
-      val landmark = landmarksModel.getLandmarkByPosition(point)
-      if (landmark.nonEmpty) {
-        landmarksModel.remove(landmark.get.id)
-        landmarksModel.setCurrent(landmark.get.id)
+      if (landmarksModel.clickingEnabled) {
+        landmarksModel.add(point)
+        landmarksModel.next
         updateView()
       }
+    },
+    actionRightClick = (point: Point[_2D]) => {
+      if (landmarksModel.clickingEnabled) {
+        val landmark = landmarksModel.getLandmarkByPosition(point)
+        if (landmark.nonEmpty) {
+          landmarksModel.remove(landmark.get.id)
+          landmarksModel.setCurrent(landmark.get.id)
+          updateView()
+        }
+      }
     }
-  }
   )
 
   clickerView.onNextButtonClick(() => {
@@ -119,7 +121,7 @@ class LMClickerViewController(private var workingDirectory: File, private var fi
     if (landmarksModel.clickingEnabled) {
       landmarksModel.prev match {
         case Some(id: String) => landmarksModel.setCurrent(id)
-        case _ => ()
+        case _                => ()
       }
       updateView()
     }
@@ -129,14 +131,16 @@ class LMClickerViewController(private var workingDirectory: File, private var fi
     if (landmarksModel.clickingEnabled) landmarksModel.setVisible(b)
   })
 
-  def getLMWithIcons = {
-    landmarksModel.getLMLabels.map(l => {
-      val lmIcon = LandmarksModel.getLMIcon(l)
-      (l, lmIcon)
-    })
+  def getLMWithIcons: IndexedSeq[(String, BufferedImage)] = {
+    landmarksModel.getLMLabels
+      .map(l => {
+        val lmIcon = LandmarksModel.getLMIcon(l)
+        (l, lmIcon)
+      })
+      .toIndexedSeq
   }
 
-  def setImageToNextFile() = {
+  def setImageToNextFile(): Unit = {
 
     val nextId = getNextImageFile
     if (nextId.isEmpty) {
@@ -147,16 +151,16 @@ class LMClickerViewController(private var workingDirectory: File, private var fi
 
   }
 
-  def resetLandmarks() = landmarksModel.reset()
+  def resetLandmarks(): Unit = landmarksModel.reset()
 
-  def saveLandmarksFile() = {
+  def saveLandmarksFile(): Any = {
     clickerView.getCurrentLandmarksFile match {
       case Some(file) => landmarksModel.saveLandmarksToFile(file)
-      case None =>
+      case None       =>
     }
   }
 
-  def updateHelpImage() = {
+  def updateHelpImage(): Unit = {
     val newHelpImage = getHelpImage(landmarksModel.current)
     newHelpImage.foreach(clickerView.updateHelpImage)
   }
@@ -167,7 +171,7 @@ class LMClickerViewController(private var workingDirectory: File, private var fi
     })
   }
 
-  def updateButtonColor() = {
+  def updateButtonColor(): Unit = {
     resetButtons()
     landmarksModel.getAddedLandmarks.foreach(id => {
       clickerView.setButtonProcessed(id.id)
@@ -175,7 +179,7 @@ class LMClickerViewController(private var workingDirectory: File, private var fi
     clickerView.setButtonActive(landmarksModel.current)
   }
 
-  def updateImageCursor() = {
+  def updateImageCursor(): Unit = {
     clickerView.updateImageCursor(LandmarksModel.getLMIcon(landmarksModel.current))
   }
 
@@ -191,7 +195,7 @@ class LMClickerViewController(private var workingDirectory: File, private var fi
     updateImageCursor()
   }
 
-  def openImage(imageFile: File) = {
+  def openImage(imageFile: File): Unit = {
     require(imageFile.exists(), "file does not exist: " + imageFile)
 
     updateWorkingDirectory(imageFile.getParentFile)
@@ -224,22 +228,20 @@ class LMClickerViewController(private var workingDirectory: File, private var fi
     require(newDirectory.exists() && newDirectory.isDirectory, s"invalid working directory: $newDirectory")
     if (newDirectory != workingDirectory) {
       workingDirectory = newDirectory
-      clickedIdsIterator = Iterator.continually(listUnclickedImages(workingDirectory) ++ listClickedImages(workingDirectory)).flatten // Kind of circular iterator
+      clickedIdsIterator = Iterator.continually(listNotYetClickedImages(workingDirectory) ++ listClickedImages(workingDirectory)).flatten // Kind of circular iterator
       clickerView.updateWorkingDirectory(workingDirectory)
     }
   }
 }
 
 object LMClickerViewController {
-  def apply(workingDirectory: File, imageFiles: Seq[File] = Nil) = {
-    val clicker = new LMClickerViewController(workingDirectory, imageFiles)
+  def apply(workingDirectory: File, imageFiles: Seq[File] = Nil): Unit = {
+    new LMClickerViewController(workingDirectory, imageFiles)
   }
-
-  private val fileSeparator: String = File.pathSeparator
 
   /** load a help image from the jar resources, heuristic file name matcher to find best help image */
   def getHelpImage(lm: String): Try[PixelImage[RGB]] = Try {
-    val imageStream = getClass.getResourceAsStream("/help/"+lm+".png")
+    val imageStream = getClass.getResourceAsStream("/help/" + lm + ".png")
     val image = ImageIO.read(imageStream)
     BufferedImageConverter.toPixelImage(image)
   }
@@ -249,11 +251,11 @@ object LMClickerViewController {
 
   /** list all images in a directory */
   def listImageFilesInDirectory(directory: File): Seq[File] = {
-    directory.listFiles.filter(isImageFile).sortBy { _.getName }
+    directory.listFiles.filter(isImageFile).sortBy { _.getName }.toIndexedSeq
   }
 
-  /** list all unclicked files in a directory */
-  def listUnclickedImages(directory: File): Seq[File] = {
+  /** list all not yet clicked files in a directory */
+  def listNotYetClickedImages(directory: File): Seq[File] = {
     listImageFilesInDirectory(directory).filter { !correspondingLandmarksFile(_).exists() }
   }
 
@@ -266,20 +268,17 @@ object LMClickerViewController {
   def checkForFilesToBeClicked(workingDirectory: File, files: Seq[File]): Iterator[File] = {
     files.flatMap { file =>
       if (file.isAbsolute) {
-        println("one "+file.toString())
+        println("one " + file.toString)
         Some(file)
-      }
-      else if (file.exists()) {
-        println("two "+file.toString)
+      } else if (file.exists()) {
+        println("two " + file.toString)
         Some(file)
-      }
-      else {
+      } else {
         val lastChance = new File(workingDirectory, file.toString)
         if (lastChance.exists()) {
-          println("three "+lastChance.toString)
+          println("three " + lastChance.toString)
           Some(lastChance)
-        }
-        else {
+        } else {
           println(s"Warning: Could not find the image file for: ${file.toString}")
           None
         }
@@ -294,7 +293,7 @@ object LMClickerViewController {
 //  }
 
 // removed _face[IDX] from name as default.
-  def correspondingLandmarksFile(imageFile: File) = {
+  def correspondingLandmarksFile(imageFile: File): File = {
     val fileName = imageFile.getName.substring(0, imageFile.getName.lastIndexOf("."))
     new File(imageFile.getParent, fileName + ".tlms")
   }

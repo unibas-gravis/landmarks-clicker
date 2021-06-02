@@ -22,29 +22,29 @@ import javax.swing.event.{TreeSelectionEvent, TreeSelectionListener}
 import javax.swing.tree.DefaultMutableTreeNode
 import javax.swing.{JPanel, JScrollPane, JTree}
 
-class FileTree(dir: File) extends JPanel{
-  /** Construct a FileTree */
+class FileTree(dir: File) extends JPanel {
 
-  var tree: JTree = new JTree(addNodes(null, dir))
-  var onFileClickedAction:(String => Unit) = s => ()
+  /** Construct a FileTree */
+  var tree: JTree = new JTree(addNodes(dir))
+  var onFileClickedAction: String => Unit = (_) => ()
 
   setLayout(new BorderLayout)
-  val scrollpane: JScrollPane = new JScrollPane
+  val scrollPane: JScrollPane = new JScrollPane
   refreshTree
 
   private def refreshTree: Component = {
-    tree = new JTree(addNodes(null, dir))
-    scrollpane.getViewport.add(tree)
+    tree = new JTree(addNodes(dir))
+    scrollPane.getViewport.add(tree)
   }
 
-  add(BorderLayout.CENTER, scrollpane)
+  add(BorderLayout.CENTER, scrollPane)
 
-  def onFileClicked(action: String => Unit) = {
+  def onFileClicked(action: String => Unit): Unit = {
     onFileClickedAction = action
     updateListener()
   }
 
-  def update() = {
+  def update(): Unit = {
     refreshTree
     updateListener()
     tree.updateUI()
@@ -52,22 +52,22 @@ class FileTree(dir: File) extends JPanel{
 
   def updateListener(): Unit = {
     tree.addTreeSelectionListener(new TreeSelectionListener() {
-      def valueChanged(e: TreeSelectionEvent) {
+      def valueChanged(e: TreeSelectionEvent): Unit = {
         val node = e.getPath.getPath.foldLeft("")((last, cur) => if (last != "") last + File.separator + cur else cur.toString)
         onFileClickedAction(node)
       }
     })
   }
 
-  /** Add nodes from under "dir" into curTop. Highly recursive. */
-  def addNodes(curTop: DefaultMutableTreeNode, dir: File): DefaultMutableTreeNode = {
+  /** Add nodes from under "dir". Highly recursive. */
+  def addNodes(dir: File): DefaultMutableTreeNode = {
     val curPath: String = dir.getPath
     val curDir: DefaultMutableTreeNode = new DefaultMutableTreeNode(curPath)
 
-    def recursiveListFiles(currentNode: DefaultMutableTreeNode, path: String):DefaultMutableTreeNode = {
+    def recursiveListFiles(currentNode: DefaultMutableTreeNode, path: String): DefaultMutableTreeNode = {
       val these = new File(path).listFiles()
       these.foreach(file => {
-        if(file.isDirectory){
+        if (file.isDirectory) {
           val subDir = new DefaultMutableTreeNode(file.getName)
           recursiveListFiles(subDir, file.getAbsolutePath)
           currentNode.add(subDir)

@@ -16,46 +16,44 @@
 
 package scalismo.faces.gui.ext
 
-import java.awt._
-import java.awt.event._
-import javax.swing.plaf.LayerUI
-import javax.swing.{JComponent, JLayer, JPanel}
-
 import scalismo.color.RGB
 import scalismo.faces.image.PixelImage
 import scalismo.geometry
-import scalismo.geometry.{Point, _2D}
+import scalismo.geometry._2D
 
-class ClickerImage(var backgroundImage:PixelImage[RGB], var mousePosition: java.awt.Point = new java.awt.Point(0,0))
-  extends ImageZoomPanel(backgroundImage.width, backgroundImage.height, backgroundImage){
+import java.awt._
+import java.awt.event._
+
+class ClickerComponents(var backgroundImage: PixelImage[RGB], var mousePosition: java.awt.Point = new java.awt.Point(0, 0))
+    extends ImageZoomPanel(backgroundImage.width, backgroundImage.height, backgroundImage) {
 
   addMouseMotionListener(new MouseAdapter {
-    override def mouseMoved(e:MouseEvent): Unit ={
+    override def mouseMoved(e: MouseEvent): Unit = {
       mousePosition = e.getPoint
       repaint()
     }
   })
 
-  override def onImageClick(actionLeftClick: (geometry.Point[_2D]) => Unit, actionRightClick: (geometry.Point[_2D]) => Unit): Unit = {
+  override def onImageClick(actionLeftClick: geometry.Point[_2D] => Unit, actionRightClick: geometry.Point[_2D] => Unit): Unit = {
     super.onImageClick(actionLeftClick, actionRightClick)
   }
 
-  override def paintComponent(g:Graphics) = {
+  override def paintComponent(g: Graphics): Unit = {
     super.paintComponent(g)
-    if(isMouseOnPanel){
+    if (isMouseOnPanel) {
       g.drawLine(0, mousePosition.getY.toInt, this.getWidth, mousePosition.getY.toInt)
       g.drawLine(mousePosition.getX.toInt, 0, mousePosition.getX.toInt, this.getHeight)
     }
   }
 
-  def isMouseOnPanel = {
+  def isMouseOnPanel: Boolean = {
     val mousePos = MouseInfo.getPointerInfo.getLocation
     val bounds = getBounds()
     bounds.setLocation(getLocationOnScreen)
     bounds.contains(mousePos)
   }
 
-  def onResize(action: () => Unit) = {
+  def onResize(action: () => Unit): Unit = {
     this.addComponentListener(new ComponentAdapter() {
       override def componentResized(e: ComponentEvent): Unit = { action() }
     })

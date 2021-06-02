@@ -17,34 +17,32 @@
 package scalismo.faces.gui.ext
 
 import java.awt.Color
-import java.awt.event.{ActionEvent, ActionListener}
+import java.awt.event.ActionEvent
 import javax.swing.{BorderFactory, JButton, UIManager}
 
 /**
- * Contains components which are only useful for Landmarks clicker
- */
+  * Contains components which are only useful for Landmarks clicker
+  */
 case class LandmarkButton(text: String) extends JButton {
   setText(text)
   setOpaque(true)
 
-  def resetLayout() = {
+  def resetLayout(): Unit = {
     setBorder(UIManager.getBorder("Button.border"))
     setBackground(UIManager.getColor("Panel.background"))
   }
 
-  def setActive() = {
+  def setActive(): Unit = {
     setBackground(Color.LIGHT_GRAY)
     setBorder(BorderFactory.createLineBorder(Color.GREEN, 2))
   }
 
-  def setProcessed() = {
+  def setProcessed(): Unit = {
     setBackground(Color.GREEN)
     setBorder(UIManager.getBorder("Button.border"))
   }
 
-  def onClick(clickListener: (ActionEvent) => Unit): Unit ={
-    addActionListener(new ActionListener {
-      override def actionPerformed(e: ActionEvent) = clickListener(e)
-    })
+  def onClick(clickListener: ActionEvent => Unit): Unit = {
+    addActionListener((e: ActionEvent) => clickListener(e))
   }
 }

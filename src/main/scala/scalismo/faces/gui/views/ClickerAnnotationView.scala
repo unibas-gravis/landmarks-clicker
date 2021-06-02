@@ -15,18 +15,17 @@
  */
 package scalismo.faces.gui.views
 
-import java.awt._
-import javax.swing.{GrayFilter, JComponent, JPanel, SwingUtilities}
-import javax.swing.plaf.LayerUI
-
 import scalismo.color.RGB
 import scalismo.faces.gui.models.LandmarksModel
 import scalismo.faces.landmarks.TLMSLandmark2D
 import scalismo.geometry.{Point, _2D}
-import java.awt
-import java.awt.event.{MouseEvent, MouseListener}
 
-class ClickerAnnotationView(val color: RGB, val correctCoordinate: (Point[_2D]) => awt.Point) extends LayerUI[JPanel] {
+import java.awt
+import java.awt._
+import javax.swing.plaf.LayerUI
+import javax.swing.{GrayFilter, JComponent, JPanel}
+
+class ClickerAnnotationView(val color: RGB, val correctCoordinate: Point[_2D] => awt.Point) extends LayerUI[JPanel] {
 
   var landmarks: Seq[TLMSLandmark2D] = Seq()
 
@@ -38,23 +37,21 @@ class ClickerAnnotationView(val color: RGB, val correctCoordinate: (Point[_2D]) 
     super.paint(g, c)
 
     val g2d = g.create().asInstanceOf[Graphics2D]
-    val w = c.getWidth
-    val h = c.getHeight
 
     g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
     g2d.setPaint(new Color(color.r.toFloat, color.g.toFloat, color.b.toFloat))
 
-    for (lm <- landmarks){
+    for (lm <- landmarks) {
       val lmImage = LandmarksModel.getLMIcon(lm.id)
 
       val posInWindow = correctCoordinate(lm.point)
 
       val center = Point(
-        (posInWindow.x - lmImage.getWidth / 2),
-        (posInWindow.y - lmImage.getHeight / 2)
+        posInWindow.x - lmImage.getWidth / 2,
+        posInWindow.y - lmImage.getHeight / 2
       )
 
-      if(lm.visible) {
+      if (lm.visible) {
         g2d.drawImage(lmImage, center.x.toInt, center.y.toInt, null)
       } else {
         g2d.drawImage(GrayFilter.createDisabledImage(lmImage), center.x.toInt, center.y.toInt, null)

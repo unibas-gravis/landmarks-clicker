@@ -24,53 +24,52 @@ import scalismo.faces.image.PixelImage
 import scalismo.faces.landmarks.TLMSLandmark2D
 import scalismo.geometry.{Point, _2D}
 
-
 trait LMClickerView {
-  def setButtonActive(id: String)
+  def setButtonActive(id: String): Unit
 
-  def setButtonProcessed(id: String)
+  def setButtonProcessed(id: String): Unit
 
-  def enableButtons()
+  def enableButtons(): Unit
 
-  def updateFaceImage(image: PixelImage[RGB])
+  def updateFaceImage(image: PixelImage[RGB]): Unit
 
-  def updateLandmarks(landmarkSeq: Seq[TLMSLandmark2D])
+  def updateLandmarks(landmarkSeq: Seq[TLMSLandmark2D]): Unit
 
   def setLandmarkButtons(buttonLabels: Seq[(String, BufferedImage)]): Unit
 
-  def updateSavePath(lmFile: File)
+  def updateSavePath(lmFile: File): Unit
 
-  def updateHelpImage(newHelpImage: PixelImage[RGB])
+  def updateHelpImage(newHelpImage: PixelImage[RGB]): Unit
 
-  def updateTitle(imageName: String)
+  def updateTitle(imageName: String): Unit
 
   def updateWorkingDirectory(directory: File): Unit
 
-  def resetButtonById(id: String)
+  def resetButtonById(id: String): Unit
 
-  def onImageChosen(action: (File) => Unit)
+  def onImageChosen(action: File => Unit): Unit
 
-  def onLandmarkSetChosen(action: (File) => Unit)
+  def onLandmarkSetChosen(action: File => Unit): Unit
 
-  def onLMButtonClick(action: (String) => Unit)
+  def onLMButtonClick(action: String => Unit): Unit
 
-  def onLoadNextIdButtonClick(action: () => Unit)
+  def onLoadNextIdButtonClick(action: () => Unit): Unit
 
-  def onResetButtonClick(action: () => Unit)
+  def onResetButtonClick(action: () => Unit): Unit
 
-  def onSaveButtonClick(action: () => Unit)
+  def onSaveButtonClick(action: () => Unit): Unit
 
-  def onNextButtonClick(action: () => Unit)
+  def onNextButtonClick(action: () => Unit): Unit
 
-  def onPreviousButtonClick(action: () => Unit)
+  def onPreviousButtonClick(action: () => Unit): Unit
 
-  def onToggleClick(action: (Boolean) => Unit)
+  def onToggleClick(action: Boolean => Unit): Unit
 
-  def onImageClick(actionLeftClick: (Point[_2D]) => Unit, actionRightClick: (Point[_2D]) => Unit)
+  def onImageClick(actionLeftClick: Point[_2D] => Unit, actionRightClick: Point[_2D] => Unit): Unit
 
-  def onImageResize(action: () => Unit)
+  def onImageResize(action: () => Unit): Unit
 
-  def updateImageCursor(icon: BufferedImage)
+  def updateImageCursor(icon: BufferedImage): Unit
 
   def getCurrentLandmarksFile: Option[File]
 
@@ -78,7 +77,7 @@ trait LMClickerView {
 
   def getImageHeight: Int
 
-  def packView()
+  def packView(): Unit
 
-  def showAlert(message: String)
+  def showAlert(message: String): Unit
 }
