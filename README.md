@@ -2,8 +2,6 @@ Landmarks Clicker
 =================
 
 [![Build Status](https://travis-ci.org/unibas-gravis/landmarks-clicker.svg?branch=master)](https://travis-ci.org/unibas-gravis/landmarks-clicker)
-
-[![Download](https://api.bintray.com/packages/unibas-gravis/maven/landmarks-clicker/images/download.svg) ](https://bintray.com/unibas-gravis/maven/landmarks-clicker/_latestVersion)
  
 
 The landmarks clicker helps you specify landmark points in 2D face images.
